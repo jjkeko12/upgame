@@ -1,0 +1,14 @@
+node_modules
+.next
+.git
+.gitignore
+uploads
+extracts
+data
+.env
+.env.*
+!.env.example
+Dockerfile
+docker-compose.yml
+README.md
+*.tsbuildinfo
