@@ -308,7 +308,7 @@ export default function GamePlayerPage() {
         </div>
       </header>
 
-      {isReady && game.extractionError && (
+      {isReady && gameSrc && game.extractionError && (
         <div className="bg-amber-900/40 border-b border-amber-700 text-amber-300 text-sm px-4 py-2">
           ⚠ {game.extractionError}
         </div>
@@ -372,9 +372,12 @@ export default function GamePlayerPage() {
           <div className="text-center max-w-md">
             <div className="text-5xl mb-4">🕹️</div>
             <p className="text-white text-lg mb-2">No playable entry point</p>
-            <p className="text-slate-400 text-sm mb-6">
-              This archive has no HTML entry point, so there is nothing to run
-              directly. Browse the {assets.length} extracted assets instead.
+            <p className="text-slate-400 text-sm mb-3">
+              {game.extractionError ??
+                "This archive has no HTML entry point, so there is nothing to run directly."}
+            </p>
+            <p className="text-slate-500 text-sm mb-6">
+              You can still browse the {assets.length} extracted files.
             </p>
             <button
               onClick={() => setView("assets")}

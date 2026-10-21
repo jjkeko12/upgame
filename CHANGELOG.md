@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.0 – launcher generation for archives without an HTML page
+- New `src/lib/entrypoint.ts`: when no HTML entry point exists, detects Unity WebGL
+  (2020+), classic Emscripten, and plain JavaScript games, and writes an
+  `index.generated.html` launcher into the game. Otherwise stores a specific
+  explanation of why the game can't run in a browser.
+- The note is shown on the game page and in the library.
+
 ## 1.0.0 – bug-fix and hardening release
 
 ### Upload

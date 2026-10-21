@@ -15,6 +15,7 @@ import {
   ExtractAbortedError,
   type ExtractResult,
 } from "@/lib/extract";
+import { ensureEntryPoint } from "@/lib/entrypoint";
 import { EXTRACT_DIR, cleanupGameFiles, ensureDirs } from "@/lib/utils";
 import { activeJobs } from "@/lib/jobs";
 
@@ -53,7 +54,7 @@ export async function createGameFromArchive(opts: {
   // can never become an unhandled rejection.
   const controller = new AbortController();
   activeJobs.set(game.id, controller);
-  void runExtraction(game.id, opts.archivePath, opts.filename, extractPath, controller.signal)
+  void runExtraction(game.id, name, opts.archivePath, opts.filename, extractPath, controller.signal)
     .catch((err) => console.error(`[extract] game ${game.id}: unexpected failure`, err))
     .finally(() => activeJobs.delete(game.id));
 
@@ -88,6 +89,7 @@ function skippedWarning(result: ExtractResult): string | null {
 
 async function runExtraction(
   gameId: number,
+  gameName: string,
   archivePath: string,
   filename: string,
   extractPath: string,
@@ -145,6 +147,15 @@ async function runExtraction(
     // The game was deleted while we were extracting: throw the work away.
     if (signal.aborted) throw new ExtractAbortedError();
 
+    // No HTML page? Try to generate a launcher, or work out why it can't run.
+    // A failure here must never fail the whole extraction.
+    let entryNote: string | null = null;
+    try {
+      entryNote = await ensureEntryPoint(result, extractPath, gameName);
+    } catch (err) {
+      console.error(`[extract] game ${gameId}: entry point analysis failed`, err);
+    }
+
     const updated = await db
       .update(games)
       .set({
@@ -153,8 +164,9 @@ async function runExtraction(
         entryPoint: result.entryPoint,
         status: "ready",
         progress: 100,
-        // On success this holds a warning about skipped files, or null.
-        extractionError: skippedWarning(result),
+        // On success this holds notes for the user (generated launcher, why the
+        // game can't run, skipped files), or null.
+        extractionError: [entryNote, skippedWarning(result)].filter(Boolean).join(" ") || null,
         updatedAt: new Date(),
       })
       .where(eq(games.id, gameId))

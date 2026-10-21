@@ -16,6 +16,14 @@ and catalogued, then play the game in the browser or browse its assets.
 - **Sandboxed playback** – games run in a sandboxed iframe with an opaque origin and a
   CSP `sandbox` header, so uploaded code cannot call this app's API.
 
+- **Automatic launcher pages** – if an archive has no HTML page, the app looks for a
+  browser-playable layout and generates one: Unity WebGL builds (high confidence),
+  classic Emscripten/WebAssembly builds (medium), and plain JavaScript games (low:
+  load order and page elements are guessed). Generated pages are named
+  `index.generated.html` and flagged on the game. If nothing fits, the game page
+  explains why (native `.exe`/`.dll`, Flash, Java, engine source projects, console
+  ROMs, assets-only archives, and so on).
+
 ## Quick start (local)
 
 Requirements: Node.js >= 20.9, PostgreSQL, and the `unzip` + `tar` binaries
